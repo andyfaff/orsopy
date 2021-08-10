@@ -6,7 +6,7 @@ Implementation of the base classes for the ORSO header.
 
 import os.path
 from typing import Optional, Union, List
-from dataclasses import field, dataclass
+from dataclasses import field, dataclass, fields
 import datetime
 import pathlib
 import warnings
@@ -42,7 +42,19 @@ class Header:
     _orso_optionals = []
 
     def __post_init__(self):
-        if hasattr(self, "unit"):
+        """Make sure Header types are correct."""
+        for field in fields(self):
+            attr=getattr(self, field.name, None)
+            type_attr=type(attr)
+            if attr is None or type_attr is field.type:
+                continue
+            elif issubclass(field.type, Header):
+                # convert to dataclass instance
+                setattr(self, field.name, field.type(**attr))
+            else:
+                # convert to type
+                setattr(self, field.name, field.type(attr))
+        if hasattr(self, 'unit'):
             self._check_unit(self.unit)
 
     def to_dict(self):
@@ -203,6 +215,7 @@ class File(Header):
     _orso_optionals = []
 
     def __post_init__(self):
+        Header.__post_init__(self)
         fname = pathlib.Path(self.file)
         if not fname.exists():
             warnings.warn(f"The file {self.file} cannot be found.")
