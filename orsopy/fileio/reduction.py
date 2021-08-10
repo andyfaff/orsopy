@@ -24,11 +24,12 @@ class Reduction(Header):
     """A description of the reduction that has been performed."""
     software: Union[Software, str]
     time: Optional[datetime.datetime] = field(
+        default=None,
         metadata={
             "description": "Timestamp string, formatted as ISO 8601 datetime"
         })
-    creator: Optional[Person]
-    corrections: Optional[List[str]]
+    creator: Optional[Person] = None
+    corrections: Optional[List[str]] = None
     computer: Optional[str] = field(
         default=None, metadata={'description': 'Computer used for reduction'})
     call: Optional[str] = field(

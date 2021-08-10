@@ -7,7 +7,7 @@ Tests for fileio module
 import unittest
 import pathlib
 from datetime import datetime
-from orsopy.fileio.orso import Orso, make_empty
+from orsopy.fileio.orso import Orso
 from orsopy.fileio.data_source import (DataSource, Experiment, Sample,
                                        Measurement, InstrumentSettings)
 from orsopy.fileio.reduction import Reduction, Software
@@ -119,7 +119,7 @@ class TestFunctions(unittest.TestCase):
         """
         Creation of the empty Orso object.
         """
-        empty = make_empty()
+        empty = Orso.empty()
         assert issubclass(empty.__class__, Orso)
         ds = empty.data_source
         assert ds.owner.name is None
@@ -136,6 +136,12 @@ class TestFunctions(unittest.TestCase):
         assert empty.reduction.software.platform is None
         assert empty.reduction.time is None
         assert empty.reduction.creator is None
+        assert ds.owner.affiliation is None
+        assert ds.experiment.title is None
+        assert ds.experiment.instrument is None
+        assert ds.experiment.timestamp is None
+        assert ds.experiment.probe is None
+        assert ds.sample.identifier is None
         assert empty.reduction.corrections is None
         assert empty.columns is None
         assert empty.data_set is None
@@ -143,8 +149,10 @@ class TestFunctions(unittest.TestCase):
     def test_empty_to_yaml(self):
         """
         Checking yaml string form empty Orso object.
+
+        TODO: Fix once correct format is known.
         """
-        empty = make_empty()
+        empty = Orso.empty()
         assert empty.to_yaml() == (
             'creator:\n  name: null\n  affiliation: null\n  time: null\n'
             '  computer: null\ndata_source:\n  owner:\n    name: null\n'

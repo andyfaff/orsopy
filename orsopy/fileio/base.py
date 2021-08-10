@@ -3,9 +3,10 @@ Implementation of the base classes for the ORSO header.
 """
 
 # author: Andrew R. McCluskey (arm61)
-
 import os.path
-from typing import Optional, Union, List
+import typing
+from typing import Optional, Union, List, get_args
+from inspect import isclass
 from dataclasses import field, dataclass, fields
 import datetime
 import pathlib
@@ -48,14 +49,30 @@ class Header:
             type_attr=type(attr)
             if attr is None or type_attr is field.type:
                 continue
-            elif issubclass(field.type, Header):
-                # convert to dataclass instance
-                setattr(self, field.name, field.type(**attr))
-            else:
-                # convert to type
-                setattr(self, field.name, field.type(attr))
+            elif isclass(field.type):
+                # simple type that we can work with, no Union or List/Dict
+                if issubclass(field.type, Header):
+                    # convert to dataclass instance
+                    setattr(self, field.name, field.type(**attr))
+                else:
+                    # convert to type
+                    setattr(self, field.name, field.type(attr))
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
+
+    @classmethod
+    def empty(cls):
+        """Create an empty instance of this item containing all non-option attributes as None"""
+        attr_items={}
+        for field in fields(cls):
+            if type(None) in get_args(field.type):
+                # skip optional arguments
+                continue
+            elif isclass(field.type) and issubclass(field.type, Header):
+                attr_items[field.name]=field.type.empty()
+            else:
+                attr_items[field.name]=None
+        return cls(**attr_items)
 
     def to_dict(self):
         """

@@ -24,25 +24,3 @@ class Orso(Header):
     columns: List[Column]
     data_set: Union[str, List[str]]
     _orso_optionals = []
-
-
-def make_empty():
-    """
-    Create a complete Orso class object, with :code:`None` in all values
-    which should be filled with objects from :code:`orsopy.fileio.base`
-    or some Python base object (:code:`int`, :code:`list`, etc.).
-
-    :return: Uninformative object
-    :rtype: orsopy.fileio.orso.Orso
-    """
-    _person = Person(None, None, None)
-    _creator = Creator(None, None, None, None, None)
-    _experiment = Experiment(None, None, None, None)
-    _instrument_settings = InstrumentSettings(None, None)
-    _measurement = Measurement(_instrument_settings, None)
-    _data_source = DataSource(
-        _person, _experiment, Sample(None), _measurement
-    )
-
-    _reduction = Reduction(Software(None, None, None), None, None, None)
-    return Orso(_creator, _data_source, _reduction, None, None)
