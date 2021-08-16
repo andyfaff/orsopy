@@ -128,8 +128,8 @@ class TestFunctions(unittest.TestCase):
         assert ds.experiment.date is None
         assert ds.experiment.probe is None
         assert ds.sample.name is None
-        assert ds.measurement.instrument_settings.incident_angle is None
-        assert ds.measurement.instrument_settings.wavelength is None
+        assert ds.measurement.instrument_settings.incident_angle.magnitude is None
+        assert ds.measurement.instrument_settings.wavelength.magnitude is None
         assert ds.measurement.data_files is None
         assert empty.reduction.software.name is None
         assert empty.reduction.software.version is None
@@ -137,12 +137,9 @@ class TestFunctions(unittest.TestCase):
         assert empty.reduction.time is None
         assert empty.reduction.creator is None
         assert ds.owner.affiliation is None
-        assert ds.experiment.title is None
-        assert ds.experiment.instrument is None
-        assert ds.experiment.timestamp is None
-        assert ds.experiment.probe is None
-        assert ds.sample.identifier is None
+        assert ds.sample.name is None
         assert empty.reduction.corrections is None
+        assert empty.reduction.creator is None
         assert empty.columns is None
         assert empty.data_set is None
 
