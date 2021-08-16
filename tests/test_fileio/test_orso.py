@@ -159,6 +159,5 @@ class TestFunctions(unittest.TestCase):
             '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
             '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
             '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            '  time: null\n  creator: null\n  corrections: null\n'
             'columns: null\ndata_set: null\n'
         )

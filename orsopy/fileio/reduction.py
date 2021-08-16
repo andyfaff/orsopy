@@ -16,7 +16,6 @@ class Software(Header):
     name: str
     version: Optional[str] = None
     platform: Optional[str] = None
-    _orso_optionals = ["version", "platform"]
 
 
 @dataclass
@@ -40,6 +39,5 @@ class Reduction(Header):
     binary: Optional[str] = field(
         default=None,
         metadata={'description': 'Path to full information file'})
-    _orso_optionals = ['computer', 'call', 'script', 'binary']
 
     __repr__ = Header._staggered_repr

@@ -29,7 +29,6 @@ class Experiment(Header):
     facility: Optional[str] = field(default=None)
     ID: Optional[str] = field(default=None)
     doi: Optional[str] = field(default=None)
-    _orso_optionals = ['facility', 'ID', 'doi']
 
 
 @dataclass
@@ -46,10 +45,6 @@ class Sample(Header):
             'description':
                 'Using keys for parameters and Value* objects for values.'
         })
-    _orso_optionals = [
-        'type', 'composition', 'description', 'environment',
-        'sample_parameters'
-    ]
 
 
 # Enum does not work with yaml, if we really want this it has to be handled as special case.
@@ -87,7 +82,6 @@ class InstrumentSettings(Header):
         metadata={
             'description': 'half / full polarized | liquid_surface | etc'
         })
-    _orso_optionals = ['configuration']
 
     __repr__ = Header._staggered_repr
 
@@ -105,7 +99,6 @@ class Measurement(Header):
             "energy-dispersive",
         ]
     ]] = None
-    _orso_optionals = ['references', 'scheme']
 
     __repr__ = Header._staggered_repr
 

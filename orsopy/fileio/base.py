@@ -40,11 +40,15 @@ class Header:
     The super class for all of the items in the orso module.
     """
 
-    _orso_optionals = []
+    _orso_optionals:List[str] = []
 
     def __post_init__(self):
         """Make sure Header types are correct."""
+        self._orso_optionals=[]
         for fld in fields(self):
+            if type(None) in get_args(fld.type):
+                # parameter is Optional == Union[something, None]
+                self._orso_optionals.append(fld.name)
             attr = getattr(self, fld.name, None)
             type_attr = type(attr)
             if attr is None or type_attr is fld.type:
@@ -197,7 +201,6 @@ class Value(Header):
     unit: Optional[str] = field(
         default=None, metadata={"description": "SI unit string"}
     )
-    _orso_optionals = ["unit"]
 
 
 @dataclass
@@ -209,7 +212,6 @@ class ValueRange(Header):
     unit: Optional[str] = field(
         default=None, metadata={"description": "SI unit string"}
     )
-    _orso_optionals = ["unit"]
 
 
 @dataclass
@@ -234,7 +236,6 @@ class ValueVector(Header):
     unit: Optional[str] = field(
         default=None, metadata={"description": "SI unit string"}
     )
-    _orso_optionals = ["unit"]
 
 
 @dataclass
@@ -242,7 +243,6 @@ class Comment(Header):
     """A comment."""
 
     comment: str
-    _orso_optionals = []
 
 
 @dataclass
@@ -254,14 +254,12 @@ class Person(Header):
     contact: Optional[str] = field(
         default=None, metadata={"description": "Contact (email) address"}
     )
-    _orso_optionals = ["contact"]
 
 
 @dataclass
 class Creator(Person):
     time: datetime.datetime = None
     computer: str = ""
-    _orso_optionals = ["contact"]
 
 
 @dataclass
@@ -275,7 +273,6 @@ class Column(Header):
     dimension: Optional[str] = field(
         default=None, metadata={"dimension": "A description of the column"}
     )
-    _orso_optionals = ["unit", "dimension"]
 
 
 @dataclass
@@ -289,7 +286,6 @@ class File(Header):
             "description": "Last modified timestamp if not given and available"
         },
     )
-    _orso_optionals = []
 
     def __post_init__(self):
         Header.__post_init__(self)
