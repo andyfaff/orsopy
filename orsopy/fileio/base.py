@@ -40,11 +40,11 @@ class Header:
     The super class for all of the items in the orso module.
     """
 
-    _orso_optionals:List[str] = []
+    _orso_optionals: List[str] = []
 
     def __post_init__(self):
         """Make sure Header types are correct."""
-        self._orso_optionals=[]
+        self._orso_optionals = []
         for fld in fields(self):
             if type(None) in get_args(fld.type):
                 # parameter is Optional == Union[something, None]
