@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9]
 
     steps:
       - uses: actions/checkout@v2
@@ -35,5 +35,5 @@ jobs:
 
       - name: Lint
         run: |
-          flake8 --ignore=F401 --count --show-source --statistics orsopy
-          flake8 --ignore=F401 --count --show-source --statistics tests
+          flake8 --ignore=F401,E501 --count --show-source --statistics orsopy
+          flake8 --ignore=F401,E501 --count --show-source --statistics tests

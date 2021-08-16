@@ -8,6 +8,8 @@ import enum
 from typing import Optional, Dict, List, Union
 from dataclasses import field, dataclass
 import datetime
+
+
 try:
     from typing import Literal
 except ImportError:
@@ -29,6 +31,7 @@ class Experiment(Header):
     doi: Optional[str] = field(default=None)
     _orso_optionals = ['facility', 'ID', 'doi']
 
+
 @dataclass
 class Sample(Header):
     """A description of the sample measured."""
@@ -41,7 +44,7 @@ class Sample(Header):
         default=None,
         metadata={
             'description':
-            'Using keys for parameters and Value* objects for values.'
+                'Using keys for parameters and Value* objects for values.'
         })
     _orso_optionals = [
         'type', 'composition', 'description', 'environment',
@@ -72,12 +75,12 @@ class InstrumentSettings(Header):
     """Settings associated with the instrumentation."""
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Literal['unpolarized', '+', '-', '--', '-+', '+-','++'],
+    polarization: Optional[Union[Literal['unpolarized', '+', '-', '--', '-+', '+-', '++'],
                                  ValueVector]] = field(
         default='unpolarized',
         metadata={
             'description':
-            'Polarization described as p / m / pp / pm / mp / mm / vector'
+                'Polarization described as p / m / pp / pm / mp / mm / vector'
         })
     configuration: Optional[str] = field(
         default=None,
@@ -86,7 +89,8 @@ class InstrumentSettings(Header):
         })
     _orso_optionals = ['configuration']
 
-    __repr__=Header._staggered_repr
+    __repr__ = Header._staggered_repr
+
 
 @dataclass
 class Measurement(Header):
@@ -103,7 +107,7 @@ class Measurement(Header):
     ]] = None
     _orso_optionals = ['references', 'scheme']
 
-    __repr__=Header._staggered_repr
+    __repr__ = Header._staggered_repr
 
 
 @dataclass
@@ -115,4 +119,4 @@ class DataSource(Header):
     measurement: Measurement
     _orso_optionals = []
 
-    __repr__=Header._staggered_repr
+    __repr__ = Header._staggered_repr

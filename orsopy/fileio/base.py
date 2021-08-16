@@ -50,7 +50,7 @@ class Header:
             if attr is None or type_attr is fld.type:
                 continue
             else:
-                updt=self._resolve_type(fld.type, attr)
+                updt = self._resolve_type(fld.type, attr)
                 if updt is not None:
                     # convert to dataclass instance
                     setattr(self, fld.name, updt)
@@ -79,16 +79,16 @@ class Header:
                     return None
         else:
             # the hint is a combined type (Union/List etc.)
-            hbase=get_origin(hint)
+            hbase = get_origin(hint)
             if hbase is list:
-                t0=get_args(hint)[0]
+                t0 = get_args(hint)[0]
                 if type(item) is list:
                     return [Header._resolve_type(t0, i) for i in item]
                 else:
                     return [Header._resolve_type(t0, item)]
             elif hbase in [Union, Optional]:
                 for subt in get_args(hint):
-                    res=Header._resolve_type(subt, item)
+                    res = Header._resolve_type(subt, item)
                     if res is not None:
                         return res
             elif hbase is Literal:
@@ -128,7 +128,7 @@ class Header:
         out_dict = {}
         for i, value in self.__dict__.items():
             if i.startswith("_") or (
-                value is None and i in self._orso_optionals
+                    value is None and i in self._orso_optionals
             ):
                 continue
 
@@ -178,15 +178,16 @@ class Header:
 
         To use in a subclass, the __repr__ method has to be replaced with this one.
         """
-        slen=len(self.__class__.__name__)
-        out=f'{self.__class__.__name__}(\n'
+        slen = len(self.__class__.__name__)
+        out = f'{self.__class__.__name__}(\n'
         for fi in fields(self):
-            nlen=len(fi.name)
-            ftxt=getattr(self, fi.name).__repr__()
-            ftxt=ftxt.replace('\n', '\n'+' '*(slen+nlen+2))
-            out+=' '*(slen+1)+f'{fi.name}={ftxt},\n'
-        out+=' '*(slen+1)+')'
+            nlen = len(fi.name)
+            ftxt = getattr(self, fi.name).__repr__()
+            ftxt = ftxt.replace('\n', '\n' + ' ' * (slen + nlen + 2))
+            out += ' ' * (slen + 1) + f'{fi.name}={ftxt},\n'
+        out += ' ' * (slen + 1) + ')'
         return out
+
 
 @dataclass
 class Value(Header):
