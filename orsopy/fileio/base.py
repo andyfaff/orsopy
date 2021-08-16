@@ -44,34 +44,37 @@ class Header:
 
     def __post_init__(self):
         """Make sure Header types are correct."""
-        for field in fields(self):
-            attr=getattr(self, field.name, None)
-            type_attr=type(attr)
-            if attr is None or type_attr is field.type:
+        for fld in fields(self):
+            attr = getattr(self, fld.name, None)
+            type_attr = type(attr)
+            if attr is None or type_attr is fld.type:
                 continue
-            elif isclass(field.type):
+            elif isclass(fld.type):
                 # simple type that we can work with, no Union or List/Dict
-                if issubclass(field.type, Header):
+                if issubclass(fld.type, Header):
                     # convert to dataclass instance
-                    setattr(self, field.name, field.type(**attr))
+                    setattr(self, fld.name, fld.type(**attr))
                 else:
                     # convert to type
-                    setattr(self, field.name, field.type(attr))
+                    setattr(self, fld.name, fld.type(attr))
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
 
     @classmethod
     def empty(cls):
-        """Create an empty instance of this item containing all non-option attributes as None"""
-        attr_items={}
-        for field in fields(cls):
-            if type(None) in get_args(field.type):
+        """
+        Create an empty instance of this item containing
+        all non-option attributes as None
+        """
+        attr_items = {}
+        for fld in fields(cls):
+            if type(None) in get_args(fld.type):
                 # skip optional arguments
                 continue
-            elif isclass(field.type) and issubclass(field.type, Header):
-                attr_items[field.name]=field.type.empty()
+            elif isclass(fld.type) and issubclass(fld.type, Header):
+                attr_items[fld.name] = fld.type.empty()
             else:
-                attr_items[field.name]=None
+                attr_items[fld.name] = None
         return cls(**attr_items)
 
     def to_dict(self):
