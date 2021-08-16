@@ -49,20 +49,22 @@ class Sample(Header):
     ]
 
 
-class Polarization(str, enum.Enum):
-    """
-    The first symbol indicates the magnetisation direction of the incident
-    beam. An optional second symbol indicates the direction of the scattered
-    beam, if a spin analyser is present.
-    """
-
-    unpolarized = "unpolarized"
-    p = "+"
-    m = "-"
-    mm = "--"
-    mp = "-+"
-    pm = "+-"
-    pp = "++"
+# Enum does not work with yaml, if we really want this it has to be handled as special case.
+#
+# class Polarization(str, enum.Enum):
+#     """
+#     The first symbol indicates the magnetisation direction of the incident
+#     beam. An optional second symbol indicates the direction of the scattered
+#     beam, if a spin analyser is present.
+#     """
+#
+#     unpolarized = "unpolarized"
+#     p = "+"
+#     m = "-"
+#     mm = "--"
+#     mp = "-+"
+#     pm = "+-"
+#     pp = "++"
 
 
 @dataclass
@@ -70,7 +72,8 @@ class InstrumentSettings(Header):
     """Settings associated with the instrumentation."""
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Polarization, ValueVector]] = field(
+    polarization: Optional[Union[Literal['unpolarized', '+', '-', '--', '-+', '+-','++'],
+                                 ValueVector]] = field(
         default='unpolarized',
         metadata={
             'description':

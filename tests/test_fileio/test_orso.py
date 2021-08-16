@@ -108,7 +108,7 @@ class TestOrso(unittest.TestCase):
         assert dsm.data_files[0].file == 'README.rst'
         assert value.reduction.software.name == 'orsopy'
         assert value.columns[0].name == 'Qz'
-        assert value.data_set == 1
+        assert value.data_set == '1'
 
 
 class TestFunctions(unittest.TestCase):
@@ -151,14 +151,14 @@ class TestFunctions(unittest.TestCase):
         """
         empty = Orso.empty()
         assert empty.to_yaml() == (
-            'creator:\n  name: null\n  affiliation: null\n  time: null\n'
-            '  computer: null\ndata_source:\n  owner:\n    name: null\n'
-            '    affiliation: null\n  experiment:\n    title: null\n'
-            '    instrument: null\n    date: null\n    probe: null\n'
-            '  sample:\n    name: null\n  measurement:\n'
-            '    instrument_settings:\n      incident_angle: null\n'
-            '      wavelength: null\n      polarization: unpolarized\n'
-            '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            '  time: null\n  creator: null\n  corrections: null\n'
+            'creator:\n  name: null\n  affiliation: null\n  time: null\n' \
+            '  computer: null\ndata_source:\n  owner:\n    name: null\n' \
+            '    affiliation: null\n  experiment:\n    title: null\n' \
+            '    instrument: null\n    date: null\n    probe: null\n' \
+            '  sample:\n    name: null\n  measurement:\n' \
+            '    instrument_settings:\n      incident_angle:\n        magnitude: null\n' \
+            '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n' \
+            '    data_files: null\nreduction:\n  software:\n    name: null\n' \
+            '  time: null\n  creator: null\n  corrections: null\n' \
             'columns: null\ndata_set: null\n'
         )
