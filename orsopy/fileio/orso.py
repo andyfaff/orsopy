@@ -6,11 +6,9 @@ Implementation of the top level class for the ORSO header.
 
 from typing import List, Union
 from dataclasses import dataclass
-from .base import Header, Column, Person, Creator
-from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
-                          Measurement)
-from .reduction import Reduction, Software
-import datetime
+from .base import Header, Column, Creator
+from .data_source import DataSource
+from .reduction import Reduction
 
 
 @dataclass
