@@ -5,7 +5,7 @@ Implementation of the base classes for the ORSO header.
 # author: Andrew R. McCluskey (arm61)
 import os.path
 import typing
-from typing import Optional, Union, List, get_args, get_origin
+from typing import Optional, Union, List, get_args, get_origin, Literal
 from inspect import isclass
 from dataclasses import field, dataclass, fields
 import datetime
@@ -91,6 +91,9 @@ class Header:
                     res=Header._resolve_type(subt, item)
                     if res is not None:
                         return res
+            elif hbase is Literal:
+                if item in get_args(hint):
+                    return item
         return None
 
     @classmethod

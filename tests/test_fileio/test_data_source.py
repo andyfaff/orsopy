@@ -21,11 +21,11 @@ class TestExperiment(unittest.TestCase):
         value = data_source.Experiment('My First Experiment',
                                        'A Lab Instrument',
                                        datetime(1992, 7, 14, 10, 10,
-                                                10), 'X-ray')
+                                                10), 'x-rays')
         assert value.title == "My First Experiment"
         assert value.instrument == 'A Lab Instrument'
         assert value.date == datetime(1992, 7, 14, 10, 10, 10)
-        assert value.probe == 'X-ray'
+        assert value.probe == 'x-rays'
         assert value.facility is None
         assert value.ID is None
         assert value.doi is None
@@ -37,10 +37,10 @@ class TestExperiment(unittest.TestCase):
         value = data_source.Experiment('My First Experiment',
                                        'A Lab Instrument',
                                        datetime(1992, 7, 14, 10, 10,
-                                                10), 'X-ray')
+                                                10), 'x-rays')
         assert value.to_yaml() == 'title: My First Experiment\n'\
             + 'instrument: A Lab Instrument\ndate: 1992-07-14T'\
-            + '10:10:10\nprobe: X-ray\n'
+            + '10:10:10\nprobe: x-rays\n'
 
     def test_creation_optionals(self):
         """
@@ -49,14 +49,14 @@ class TestExperiment(unittest.TestCase):
         value = data_source.Experiment('My First Neutron Experiment',
                                        'TAS8',
                                        datetime(1992, 7, 14, 10, 10, 10),
-                                       'neutron',
+                                       'neutrons',
                                        facility='Risoe',
                                        ID='abc123',
                                        doi='10.0000/abc1234')
         assert value.title == "My First Neutron Experiment"
         assert value.instrument == 'TAS8'
         assert value.date == datetime(1992, 7, 14, 10, 10, 10)
-        assert value.probe == 'neutron'
+        assert value.probe == 'neutrons'
         assert value.facility == 'Risoe'
         assert value.ID == 'abc123'
         assert value.doi == '10.0000/abc1234'
@@ -68,13 +68,13 @@ class TestExperiment(unittest.TestCase):
         value = data_source.Experiment('My First Neutron Experiment',
                                        'TAS8',
                                        datetime(1992, 7, 14, 10, 10, 10),
-                                       'neutron',
+                                       'neutrons',
                                        facility='Risoe',
                                        ID='abc123',
                                        doi='10.0000/abc1234')
         assert value.to_yaml() == 'title: My First Neutron Experiment\n'\
             + 'instrument: TAS8\ndate: 1992-07-14T'\
-            + '10:10:10\nprobe: neutron\nfacility: Risoe\nID: '\
+            + '10:10:10\nprobe: neutrons\nfacility: Risoe\nID: '\
             + 'abc123\ndoi: 10.0000/abc1234\n'
 
 
@@ -154,7 +154,7 @@ class TestDataSource(unittest.TestCase):
         value = data_source.DataSource(
             base.Person('A Person', 'Some Uni'),
             data_source.Experiment('My First Experiment', 'A Lab Instrument',
-                                   datetime(1992, 7, 14, 10, 10, 10), 'X-ray'),
+                                   datetime(1992, 7, 14, 10, 10, 10), 'x-rays'),
             data_source.Sample('A Perfect Sample'),
             m)
         assert value.owner.name == 'A Person'
@@ -162,7 +162,7 @@ class TestDataSource(unittest.TestCase):
         assert value.experiment.title == 'My First Experiment'
         assert value.experiment.instrument == 'A Lab Instrument'
         assert value.experiment.date == datetime(1992, 7, 14, 10, 10, 10)
-        assert value.experiment.probe == 'X-ray'
+        assert value.experiment.probe == 'x-rays'
         assert value.sample.name == 'A Perfect Sample'
 
 
@@ -205,14 +205,14 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(base.Value(4., 'deg'),
                                                base.ValueRange(
                                                    2., 12., 'angstrom'),
-                                               polarization='p',
+                                               polarization='+',
                                                configuration='liquid surface')
         assert value.incident_angle.magnitude == 4.
         assert value.incident_angle.unit == 'deg'
         assert value.wavelength.min == 2.
         assert value.wavelength.max == 12.
         assert value.wavelength.unit == 'angstrom'
-        assert value.polarization == 'p'
+        assert value.polarization == '+'
         assert value.configuration == 'liquid surface'
 
     def test_to_yaml_config_and_polarization(self):
@@ -222,11 +222,11 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(base.Value(4., 'deg'),
                                                base.ValueRange(
                                                    2., 12., 'angstrom'),
-                                               polarization='p',
+                                               polarization='+',
                                                configuration='liquid surface')
         assert value.to_yaml() == 'incident_angle:\n  magnitude: '\
             + '4.0\n  unit: deg\nwavelength:\n  min: 2.0\n  '\
-            + 'max: 12.0\n  unit: angstrom\npolarization: p\n'\
+            + 'max: 12.0\n  unit: angstrom\npolarization: +\n'\
             + 'configuration: liquid surface\n'
 
 

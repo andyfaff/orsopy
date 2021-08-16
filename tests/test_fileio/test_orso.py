@@ -63,7 +63,7 @@ class TestOrso(unittest.TestCase):
         assert value.reduction.time == datetime(2021, 7, 14, 10, 10, 10)
         assert value.columns[0].name == 'Qz'
         assert value.columns[1].name == 'R'
-        assert value.data_set == 0
+        assert value.data_set == '0'
 
         h = value.to_yaml()
         h = "\n".join(
