@@ -63,27 +63,29 @@ class Header:
     def _resolve_type(hint, item):
         if isclass(hint):
             # simple type that we can work with, no Union or List/Dict
+            if isinstance(item, hint):
+                return item
             if issubclass(hint, Header):
                 # convert to dataclass instance
-                if isinstance(item, hint):
-                    return item
-                else:
-                    try:
-                        return hint(**item)
-                    except (ValueError, TypeError):
-                        return None
+                try:
+                    return hint(**item)
+                except (ValueError, TypeError):
+                    return None
             else:
                 # convert to type
                 try:
                     return hint(item)
-                except ValueError:
+                except (ValueError, TypeError):
                     return None
         else:
             # the hint is a combined type (Union/List etc.)
             hbase=get_origin(hint)
-            if hbase is List:
-                t0=get_args(hint)
-                return [Header._resolve_type(t0, item)]
+            if hbase is list:
+                t0=get_args(hint)[0]
+                if type(item) is list:
+                    return [Header._resolve_type(t0, i) for i in item]
+                else:
+                    return [Header._resolve_type(t0, item)]
             elif hbase in [Union, Optional]:
                 for subt in get_args(hint):
                     res=Header._resolve_type(subt, item)
