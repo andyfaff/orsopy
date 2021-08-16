@@ -25,11 +25,6 @@ jobs:
           pip install flake8 pytest
           if [ -f requirements_dev.txt ]; then pip install -r requirements_dev.txt; fi
 
-      - name: Lint
-        run: |
-          flake8 --ignore=F401 --count --show-source --statistics orsopy
-          flake8 --ignore=F401 --count --show-source --statistics tests
-
       - name: Install orsopy
         run: | 
           pip install .
@@ -37,3 +32,8 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+
+      - name: Lint
+        run: |
+          flake8 --ignore=F401 --count --show-source --statistics orsopy
+          flake8 --ignore=F401 --count --show-source --statistics tests
