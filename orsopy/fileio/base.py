@@ -5,7 +5,7 @@ Implementation of the base classes for the ORSO header.
 # author: Andrew R. McCluskey (arm61)
 import os.path
 import typing
-from typing import Optional, Union, List, get_args
+from typing import Optional, Union, List, get_args, get_origin
 from inspect import isclass
 from dataclasses import field, dataclass, fields
 import datetime
@@ -49,16 +49,47 @@ class Header:
             type_attr = type(attr)
             if attr is None or type_attr is fld.type:
                 continue
-            elif isclass(fld.type):
-                # simple type that we can work with, no Union or List/Dict
-                if issubclass(fld.type, Header):
+            else:
+                updt=self._resolve_type(fld.type, attr)
+                if updt is not None:
                     # convert to dataclass instance
-                    setattr(self, fld.name, fld.type(**attr))
+                    setattr(self, fld.name, updt)
                 else:
-                    # convert to type
-                    setattr(self, fld.name, fld.type(attr))
+                    raise ValueError(f"No suitable conversion found for {fld.type} with value {attr}")
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
+
+    @staticmethod
+    def _resolve_type(hint, item):
+        if isclass(hint):
+            # simple type that we can work with, no Union or List/Dict
+            if issubclass(hint, Header):
+                # convert to dataclass instance
+                if isinstance(item, hint):
+                    return item
+                else:
+                    try:
+                        return hint(**item)
+                    except (ValueError, TypeError):
+                        return None
+            else:
+                # convert to type
+                try:
+                    return hint(item)
+                except ValueError:
+                    return None
+        else:
+            # the hint is a combined type (Union/List etc.)
+            hbase=get_origin(hint)
+            if hbase is List:
+                t0=get_args(hint)
+                return [Header._resolve_type(t0, item)]
+            elif hbase in [Union, Optional]:
+                for subt in get_args(hint):
+                    res=Header._resolve_type(subt, item)
+                    if res is not None:
+                        return res
+        return None
 
     @classmethod
     def empty(cls):
@@ -73,6 +104,10 @@ class Header:
                 continue
             elif isclass(fld.type) and issubclass(fld.type, Header):
                 attr_items[fld.name] = fld.type.empty()
+            elif get_origin(fld.type) is Union and issubclass(get_args(fld.type)[0], Header):
+                attr_items[fld.name] = get_args(fld.type)[0].empty()
+            elif get_origin(fld.type) is List and issubclass(get_args(fld.type)[0], Header):
+                attr_items[fld.name] = [get_args(fld.type)[0].empty()]
             else:
                 attr_items[fld.name] = None
         return cls(**attr_items)
