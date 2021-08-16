@@ -41,3 +41,5 @@ class Reduction(Header):
         default=None,
         metadata={'description': 'Path to full information file'})
     _orso_optionals = ['computer', 'call', 'script', 'binary']
+
+    __repr__=Header._staggered_repr

@@ -166,6 +166,22 @@ class Header:
             if not unit.isascii():
                 raise ValueError("The unit must be in ASCII text.")
 
+    def _staggered_repr(self):
+        """
+        Generate a string representation distributed over multiple lines
+        to improve readability.
+
+        To use in a subclass, the __repr__ method has to be replaced with this one.
+        """
+        slen=len(self.__class__.__name__)
+        out=f'{self.__class__.__name__}(\n'
+        for fi in fields(self):
+            nlen=len(fi.name)
+            ftxt=getattr(self, fi.name).__repr__()
+            ftxt=ftxt.replace('\n', '\n'+' '*(slen+nlen+2))
+            out+=' '*(slen+1)+f'{fi.name}={ftxt},\n'
+        out+=' '*(slen+1)+')'
+        return out
 
 @dataclass
 class Value(Header):

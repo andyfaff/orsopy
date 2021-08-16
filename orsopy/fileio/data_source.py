@@ -29,7 +29,6 @@ class Experiment(Header):
     doi: Optional[str] = field(default=None)
     _orso_optionals = ['facility', 'ID', 'doi']
 
-
 @dataclass
 class Sample(Header):
     """A description of the sample measured."""
@@ -84,6 +83,7 @@ class InstrumentSettings(Header):
         })
     _orso_optionals = ['configuration']
 
+    __repr__=Header._staggered_repr
 
 @dataclass
 class Measurement(Header):
@@ -100,6 +100,8 @@ class Measurement(Header):
     ]] = None
     _orso_optionals = ['references', 'scheme']
 
+    __repr__=Header._staggered_repr
+
 
 @dataclass
 class DataSource(Header):
@@ -109,3 +111,5 @@ class DataSource(Header):
     sample: Sample
     measurement: Measurement
     _orso_optionals = []
+
+    __repr__=Header._staggered_repr
