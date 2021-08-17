@@ -113,7 +113,8 @@ class BaseHeader:
                 attr_items[fld.name] = fld.type.empty()
             elif get_origin(fld.type) is Union and issubclass(get_args(fld.type)[0], Header):
                 attr_items[fld.name] = get_args(fld.type)[0].empty()
-            elif get_origin(fld.type) is List and issubclass(get_args(fld.type)[0], Header):
+            elif get_origin(fld.type) is list and isclass(get_args(fld.type)[0])\
+                    and issubclass(get_args(fld.type)[0], Header):
                 attr_items[fld.name] = [get_args(fld.type)[0].empty()]
             else:
                 attr_items[fld.name] = None
@@ -226,13 +227,14 @@ class HeaderMeta(type):
 
             # create the _orso_optional attribute
             attrs['_orso_optionals']=[]
-            for name, ftype in attrs['__annotations__'].items():
+            for fname, ftype in attrs['__annotations__'].items():
                 if type(None) in get_args(ftype):
-                    attrs['_orso_optionals'].append(name)
+                    attrs['_orso_optionals'].append(fname)
             for base in bases:
                 if hasattr(base, '_orso_optionals'):
                     attrs['_orso_optionals']+=getattr(base, '_orso_optionals')
         return type.__new__(cls, name, bases, attrs, **kwargs)
+
 
 class Header(BaseHeader, metaclass=HeaderMeta):
     """
