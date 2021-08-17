@@ -239,7 +239,7 @@ def _read_header_data(file):
     with _possibly_open_file(file, "r") as fi:
         header = []
 
-        # variables to keep track of where the datasets are
+        # variables to keep track of where the numerical datasets are
         ds_lines = []
         in_ds = False
         start_line = -1
@@ -253,6 +253,8 @@ def _read_header_data(file):
                     in_ds = True
                     start_line = i
                 continue
+
+            # at this point all lines begin with #
             if in_ds:
                 # you've reached the first line after a comment line
                 end_line = i - 1
@@ -316,7 +318,7 @@ def _validate_header_data(dct_list: List[dict]):
     Parameters
     ----------
     dct_list : List[dict]
-        Header of file
+        dicts corresponding to parsed yaml headers from the ORT file.
     """
     import jsonschema
 
@@ -370,7 +372,7 @@ def _nested_update(d, u):
     for k, v in u.items():
         if isinstance(d, Mapping):
             if isinstance(v, Mapping):
-                r = update(d.get(k, {}), v)
+                r = _nested_update(d.get(k, {}), v)
                 d[k] = r
             else:
                 d[k] = u[k]
