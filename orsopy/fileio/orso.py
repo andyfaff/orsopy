@@ -11,7 +11,7 @@ from .data_source import DataSource
 from .reduction import Reduction
 
 
-@dataclass
+@dataclass(repr=False)
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.

@@ -10,7 +10,7 @@ import datetime
 from .base import Header, Person
 
 
-@dataclass
+@dataclass(repr=False)
 class Software(Header):
     """Description of the reduction software."""
     name: str
@@ -18,7 +18,7 @@ class Software(Header):
     platform: Optional[str] = None
 
 
-@dataclass
+@dataclass(repr=False)
 class Reduction(Header):
     """A description of the reduction that has been performed."""
     software: Union[Software, str]
