@@ -49,7 +49,7 @@ class TestOrso(unittest.TestCase):
         )
 
         cols = [Column("Qz"), Column("R")]
-        value = Orso(c, ds, redn, cols, 0)
+        value = Orso(c, ds, redn, 0, cols)
 
         assert value.creator.name == "A Person"
         assert value.creator.contact == "wally@wallyland.com"
@@ -105,7 +105,7 @@ class TestOrso(unittest.TestCase):
         )
 
         cols = [Column("Qz"), Column("R")]
-        value = Orso(c, ds, redn, cols, 1)
+        value = Orso(c, ds, redn, 1, cols)
 
         dsm = value.data_source.measurement
         assert value.data_source.owner.name == 'A Person'
@@ -144,7 +144,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.sample.name is None
         assert empty.reduction.corrections is None
         assert empty.reduction.creator is None
-        assert empty.columns is None
+        assert empty.columns == [Column.empty()]
         assert empty.data_set is None
 
     def test_empty_to_yaml(self):
@@ -163,5 +163,6 @@ class TestFunctions(unittest.TestCase):
             '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
             '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
             '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            'columns: null\ndata_set: null\n'
+            'data_set: null\ncolumns:\n- name: null\n'
+
         )

@@ -152,32 +152,6 @@ class TestValueRange(unittest.TestCase):
         assert value.to_yaml() == 'min: null\nmax: 1.0\n'
 
 
-class TestComment(unittest.TestCase):
-    """
-    Testing the Comment class
-    """
-    def test_creation(self):
-        """
-        Creation of a comment.
-        """
-        value = base.Comment('Hello World')
-        assert value.comment == 'Hello World'
-
-    def test_to_yaml(self):
-        """
-        Transform to yaml.
-        """
-        value = base.Comment('Hello World')
-        assert value.to_yaml() == 'comment: Hello World\n'
-
-    def test_no_comment_to_yaml(self):
-        """
-        Transform to yaml with None.
-        """
-        value = base.Comment(None)
-        assert value.to_yaml() == 'comment: null\n'
-
-
 class TestPerson(unittest.TestCase):
     """
     Testing the Person class
