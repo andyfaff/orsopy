@@ -1,7 +1,8 @@
 """
 Implementation of the Orso class that defined the header.
 """
-from .base import Header, Column, Person, ValueRange, ValueVector, Value, File
+from .base import (Header, Column, Person, ValueRange, ValueVector, Value,
+                   File, _read_header_data, _validate_header_data)
 from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
                           Measurement)
 from .reduction import Reduction, Software

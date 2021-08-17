@@ -184,14 +184,14 @@ class sQz_column(column):
 @dataclass
 class ORSOHeader:
     creator: Creator
-    data_source: Union[List[DataSource], DataSource]
+    data_source: DataSource
     columns: Union[
         Tuple[qz_column, R_column],
         Tuple[qz_column, R_column, sR_column],
         Tuple[qz_column, R_column, sR_column, sQz_column],
     ]
     reduction: Optional[Reduction] = None
-    data_set: Union[str, List[str]] = None
+    data_set: Union[str, int] = None
 
 
 if GENERATE_SCHEMA:

@@ -7,12 +7,13 @@ Tests for fileio module
 import unittest
 import pathlib
 from datetime import datetime
+import yaml
 from orsopy.fileio.orso import Orso
 from orsopy.fileio.data_source import (DataSource, Experiment, Sample,
                                        Measurement, InstrumentSettings)
 from orsopy.fileio.reduction import Reduction, Software
 from orsopy.fileio.base import Person, ValueRange, Value, File, Column, Creator
-from orsopy.fileio.base import _validate_header
+from orsopy.fileio.base import _validate_header_data
 
 
 class TestOrso(unittest.TestCase):
@@ -71,7 +72,8 @@ class TestOrso(unittest.TestCase):
              " | https://www.reflectometry.org/",
              h]
         )
-        _validate_header(h)
+        g = yaml.safe_load_all(h)
+        _validate_header_data([next(g)])
 
     def test_creation_data_set1(self):
         """

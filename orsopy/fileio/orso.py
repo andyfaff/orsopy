@@ -17,9 +17,9 @@ class Orso(Header):
     The Orso object collects the necessary metadata.
     """
     creator: Creator
-    data_source: Union[DataSource, List[DataSource]]
+    data_source: DataSource
     reduction: Reduction
     columns: List[Column]
-    data_set: Union[str, List[str]]
+    data_set: Union[str, int]
 
     __repr__ = Header._staggered_repr

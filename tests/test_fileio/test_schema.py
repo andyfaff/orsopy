@@ -3,7 +3,7 @@ import os.path
 import jsonschema
 import yaml
 import orsopy
-from orsopy.fileio.base import _read_header, _validate_header
+from orsopy.fileio.base import _read_header_data, _validate_header_data
 
 
 class TestSchema:
@@ -13,11 +13,16 @@ class TestSchema:
         with open(schema_pth, "r") as f:
             schema = json.load(f)
 
-        header = _read_header(os.path.join("tests", "test_example.ort"))
-        d = yaml.safe_load(header)
+        dct_list, data = _read_header_data(
+            os.path.join("tests", "test_example.ort")
+        )
+
         # d contains datetime.datetime objects, which would fail the
         # jsonschema validation, so force those to be strings.
-        d = json.loads(json.dumps(d, default=str))
-        jsonschema.validate(d, schema)
+        modified_dct_list = [
+            json.loads(json.dumps(dct, default=str)) for dct in dct_list
+        ]
+        for dct in modified_dct_list:
+            jsonschema.validate(dct, schema)
 
-        _validate_header(header)
+        _validate_header_data(dct_list)
