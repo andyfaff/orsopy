@@ -37,7 +37,31 @@ def __datetime_representer(dumper, data):
 yaml.add_representer(datetime.datetime, __datetime_representer)
 
 
-class BaseHeader:
+class HeaderMeta(type):
+    """
+    Metaclass for Header.
+    Creates a dataclass with an additional comment attribute.
+    """
+
+    def __new__(cls, name, bases, attrs, **kwargs):
+        if '__annotations__' in attrs:
+            # only applies to dataclass children of Header
+            # add optional comment attribute, needs to come last
+            attrs['__annotations__']['comment']=Optional[str]
+            attrs['comment']=field(default=None)
+
+            # create the _orso_optional attribute
+            attrs['_orso_optionals']=[]
+            for fname, ftype in attrs['__annotations__'].items():
+                if type(None) in get_args(ftype):
+                    attrs['_orso_optionals'].append(fname)
+            for base in bases:
+                if hasattr(base, '_orso_optionals'):
+                    attrs['_orso_optionals']+=getattr(base, '_orso_optionals')
+        return type.__new__(cls, name, bases, attrs, **kwargs)
+
+
+class Header(metaclass=HeaderMeta):
     """
     The super class for all of the items in the orso module.
     """
@@ -204,42 +228,6 @@ class BaseHeader:
             out += ' ' * (slen + 1) + f'{fi.name}={ftxt},\n'
         out += ' ' * (slen + 1) + ')'
         return out
-
-@dataclass(repr=False)
-class Comment(BaseHeader):
-    """A comment."""
-
-    comment: str
-
-
-class HeaderMeta(type):
-    """
-    Metaclass for Header.
-    Creates a dataclass with an additional comment attribute.
-    """
-
-    def __new__(cls, name, bases, attrs, **kwargs):
-        if '__annotations__' in attrs:
-            # only applies to dataclass children of Header
-            # add optional comment attribute, needs to come last
-            attrs['__annotations__']['comment']=Optional[Comment]
-            attrs['comment']=field(default=None)
-
-            # create the _orso_optional attribute
-            attrs['_orso_optionals']=[]
-            for fname, ftype in attrs['__annotations__'].items():
-                if type(None) in get_args(ftype):
-                    attrs['_orso_optionals'].append(fname)
-            for base in bases:
-                if hasattr(base, '_orso_optionals'):
-                    attrs['_orso_optionals']+=getattr(base, '_orso_optionals')
-        return type.__new__(cls, name, bases, attrs, **kwargs)
-
-
-class Header(BaseHeader, metaclass=HeaderMeta):
-    """
-    Class containing any header information that may include a comment.
-    """
 
 
 @dataclass(repr=False)

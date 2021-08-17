@@ -15,6 +15,8 @@ def main():
     info2.data_source.measurement.instrument_settings.polarization='-'
     info.data_set='up polarization'
     info2.data_set='down polarization'
+    info2.data_source.sample.comment='this is a comment'
+
     ds=fileio.OrsoDataset(info, data)
     ds2=fileio.OrsoDataset(info2, data)
 
