@@ -36,7 +36,8 @@ def __datetime_representer(dumper, data):
 
 yaml.add_representer(datetime.datetime, __datetime_representer)
 
-class Header:
+
+class BaseHeader:
     """
     The super class for all of the items in the orso module.
     """
@@ -45,11 +46,7 @@ class Header:
 
     def __post_init__(self):
         """Make sure Header types are correct."""
-        self._orso_optionals = []
         for fld in fields(self):
-            if type(None) in get_args(fld.type):
-                # parameter is Optional == Union[something, None]
-                self._orso_optionals.append(fld.name)
             attr = getattr(self, fld.name, None)
             type_attr = type(attr)
             if attr is None or type_attr is fld.type:
@@ -207,6 +204,41 @@ class Header:
         out += ' ' * (slen + 1) + ')'
         return out
 
+@dataclass(repr=False)
+class Comment(BaseHeader):
+    """A comment."""
+
+    comment: str
+
+
+class HeaderMeta(type):
+    """
+    Metaclass for Header.
+    Creates a dataclass with an additional comment attribute.
+    """
+
+    def __new__(cls, name, bases, attrs, **kwargs):
+        if '__annotations__' in attrs:
+            # only applies to dataclass children of Header
+            # add optional comment attribute, needs to come last
+            attrs['__annotations__']['comment']=Optional[Comment]
+            attrs['comment']=field(default=None)
+
+            # create the _orso_optional attribute
+            attrs['_orso_optionals']=[]
+            for name, ftype in attrs['__annotations__'].items():
+                if type(None) in get_args(ftype):
+                    attrs['_orso_optionals'].append(name)
+            for base in bases:
+                if hasattr(base, '_orso_optionals'):
+                    attrs['_orso_optionals']+=getattr(base, '_orso_optionals')
+        return type.__new__(cls, name, bases, attrs, **kwargs)
+
+class Header(BaseHeader, metaclass=HeaderMeta):
+    """
+    Class containing any header information that may include a comment.
+    """
+
 
 @dataclass(repr=False)
 class Value(Header):
@@ -254,13 +286,6 @@ class ValueVector(Header):
 
 
 @dataclass(repr=False)
-class Comment(Header):
-    """A comment."""
-
-    comment: str
-
-
-@dataclass(repr=False)
 class Person(Header):
     """Information about a person, including name, affilation(s), and email."""
 
@@ -272,9 +297,14 @@ class Person(Header):
 
 
 @dataclass(repr=False)
-class Creator(Person):
-    time: datetime.datetime = None
-    computer: str = ""
+class Creator(Header):
+    name: str
+    affiliation: Union[str, List[str]]
+    time: datetime.datetime
+    computer: str
+    contact: Optional[str] = field(
+        default=None, metadata={"description": "Contact (email) address"}
+    )
 
 
 @dataclass(repr=False)
