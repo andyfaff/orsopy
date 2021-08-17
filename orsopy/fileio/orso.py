@@ -112,6 +112,9 @@ class OrsoDataset:
     def save(self, fname):
         return save([self], fname)
 
+    def __eq__(self, other: 'OrsoDataset'):
+        return self.info == other.info and (self.data == other.data).all()
+
 
 class ORSOIOError(IOError):
     pass
