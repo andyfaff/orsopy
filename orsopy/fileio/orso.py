@@ -32,19 +32,19 @@ class Orso(Header):
     __repr__ = Header._staggered_repr
 
     def column_header(self):
-        out='# '
+        out = '# '
         for ci in self.columns:
             if ci.unit is None:
-                out+='%-22s '%ci.name
+                out += '%-22s ' % ci.name
             else:
-                out+='%-22s '%(f"{ci.name} ({ci.unit})")
+                out += '%-22s ' % (f"{ci.name} ({ci.unit})")
             if ci is self.columns[0]:
-                out=out[:-4] # strip two characters from first column to align
+                out = out[:-4]  # strip two characters from first column to align
         return out[:-1]
 
     def from_difference(self, other_dict):
         # recreate info from difference dictionary
-        output=self.to_dict()
+        output = self.to_dict()
         self._update_dict(output, other_dict)
         return Orso(**output)
 
@@ -54,7 +54,7 @@ class Orso(Header):
             if key in old and type(value) is dict:
                 Orso._update_dict(old[key], value)
             else:
-                old[key]=value
+                old[key] = value
 
     def to_difference(self, other: 'Orso'):
         # return a dictionary of differences to other object
@@ -66,7 +66,7 @@ class Orso(Header):
     @staticmethod
     def _dict_diff(old, new):
         # recursive find differences between two dictionaries
-        out={}
+        out = {}
         for key, value in new.items():
             if key in old:
                 if type(value) is dict:
@@ -75,13 +75,14 @@ class Orso(Header):
                         continue
                     else:
                         out[key] = diff
-                elif old[key]==value:
+                elif old[key] == value:
                     continue
                 else:
                     out[key] = value
             else:
                 out[key] = value
         return out
+
 
 @dataclass
 class OrsoDataset:
@@ -93,8 +94,8 @@ class OrsoDataset:
             raise ValueError("Data has to have the same number of columns as header")
 
     def header(self):
-        out=self.info.to_yaml()
-        out+=self.info.column_header()
+        out = self.info.to_yaml()
+        out += self.info.column_header()
         return out
 
     def diff_header(self, other: 'OrsoDataset'):
@@ -103,7 +104,7 @@ class OrsoDataset:
         if 'data_set' in out_dict:
             del out_dict['data_set']
         out = f'data_set: {other.info.data_set}\n'
-        if out_dict!={}:
+        if out_dict != {}:
             out += yaml.dump(out_dict, sort_keys=False)
         out += self.info.column_header()
         return out
@@ -127,43 +128,45 @@ def save(datasets: List[OrsoDataset], fname: Union[TextIO, str]):
             hi = ds1.diff_header(dsi)
             np.savetxt(f, dsi.data.T, header=hi, fmt='%-22.16e')
 
+
 def read_data(text_data):
     # read the data from the text, faster then numpy loadtxt with StringIO
-    data=[li.split() for li in text_data.strip().splitlines() if not li.startswith('#')]
+    data = [li.split() for li in text_data.strip().splitlines() if not li.startswith('#')]
     return np.array(data, dtype=float).T
+
 
 def load(fname: Union[TextIO, str]):
     with _possibly_open_file(fname, 'r') as fh:
         # check if this is the right file type
-        l1=fh.readline()
+        l1 = fh.readline()
         if not l1.lower().startswith('# # orso'):
             raise ORSOIOError('Not an ORSO reflectivity text file, wrong header')
-        text=fh.read()
-    ftype_info=list(map(str.strip, l1.split('|')))
+        text = fh.read()
+    ftype_info = list(map(str.strip, l1.split('|')))
     # find end of comment block (first line not starting with #
-    data_start=re.search(r'\n[^#]', text).start()
-    header=text[:data_start-1]
-    header=header[2:].replace('\n# ', '\n')  # remove header comment to make the text valid yaml
-    header_encoding=ftype_info[2].lower().split()[0]
-    if header_encoding=='yaml':
-        main_header_dict=yaml.load(header, Loader=yaml.FullLoader)
-        ds_string='\n# data_set:'
-    elif header_encoding=='json':
+    data_start = re.search(r'\n[^#]', text).start()
+    header = text[:data_start - 1]
+    header = header[2:].replace('\n# ', '\n')  # remove header comment to make the text valid yaml
+    header_encoding = ftype_info[2].lower().split()[0]
+    if header_encoding == 'yaml':
+        main_header_dict = yaml.load(header, Loader=yaml.FullLoader)
+        ds_string = '\n# data_set:'
+    elif header_encoding == 'json':
         raise NotImplementedError('JSON will come in future')
     else:
-        raise ORSOIOError('Unknown header encoding "%s"'%header_encoding)
-    main_info=Orso(**main_header_dict)
+        raise ORSOIOError('Unknown header encoding "%s"' % header_encoding)
+    main_info = Orso(**main_header_dict)
 
     # implement possibility of more then one data block:
     if ds_string in text:
-        split_indices = [match.start()+data_start for
-                         match in re.finditer(ds_string, text[data_start:])]+[-1]
+        split_indices = [match.start() + data_start for
+                         match in re.finditer(ds_string, text[data_start:])] + [-1]
         output = [OrsoDataset(main_info,
                               read_data(text[data_start:split_indices[0]]))]
         for i, si in enumerate(split_indices[:-1]):
             sub_header_length = re.search(r'\n[^#]', text[si:]).start()
-            data = read_data(text[si+sub_header_length:split_indices[i+1]])
-            sub_header_text = text[si+2:si+sub_header_length].rsplit('\n', 1)[0].replace('\n# ', '\n').strip()
+            data = read_data(text[si + sub_header_length:split_indices[i + 1]])
+            sub_header_text = text[si + 2:si + sub_header_length].rsplit('\n', 1)[0].replace('\n# ', '\n').strip()
             if header_encoding == 'yaml':
                 sub_header_data = yaml.load(sub_header_text, Loader=yaml.FullLoader)
             elif header_encoding == 'json':

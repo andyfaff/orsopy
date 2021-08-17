@@ -47,17 +47,17 @@ class HeaderMeta(type):
         if '__annotations__' in attrs:
             # only applies to dataclass children of Header
             # add optional comment attribute, needs to come last
-            attrs['__annotations__']['comment']=Optional[str]
-            attrs['comment']=field(default=None)
+            attrs['__annotations__']['comment'] = Optional[str]
+            attrs['comment'] = field(default=None)
 
             # create the _orso_optional attribute
-            attrs['_orso_optionals']=[]
+            attrs['_orso_optionals'] = []
             for fname, ftype in attrs['__annotations__'].items():
                 if type(None) in get_args(ftype):
                     attrs['_orso_optionals'].append(fname)
             for base in bases:
                 if hasattr(base, '_orso_optionals'):
-                    attrs['_orso_optionals']+=getattr(base, '_orso_optionals')
+                    attrs['_orso_optionals'] += getattr(base, '_orso_optionals')
         return type.__new__(cls, name, bases, attrs, **kwargs)
 
 
@@ -137,7 +137,7 @@ class Header(metaclass=HeaderMeta):
                 attr_items[fld.name] = fld.type.empty()
             elif get_origin(fld.type) is Union and issubclass(get_args(fld.type)[0], Header):
                 attr_items[fld.name] = get_args(fld.type)[0].empty()
-            elif get_origin(fld.type) is list and isclass(get_args(fld.type)[0])\
+            elif get_origin(fld.type) is list and isclass(get_args(fld.type)[0]) \
                     and issubclass(get_args(fld.type)[0], Header):
                 attr_items[fld.name] = [get_args(fld.type)[0].empty()]
             else:
@@ -155,7 +155,7 @@ class Header(metaclass=HeaderMeta):
         out_dict = {}
         for i, value in self.__dict__.items():
             if i.startswith("_") or (
-                value is None and i in self._orso_optionals
+                    value is None and i in self._orso_optionals
             ):
                 continue
 
@@ -206,7 +206,7 @@ class Header(metaclass=HeaderMeta):
                 # ignore empty optional arguments
                 continue
             out += f'{fi.name}={getattr(self, fi.name).__repr__()}, '
-        out = out[:-2]+')'
+        out = out[:-2] + ')'
         return out
 
     def _staggered_repr(self):

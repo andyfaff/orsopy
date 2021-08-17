@@ -9,7 +9,6 @@ from typing import Optional, Dict, List, Union
 from dataclasses import field, dataclass
 import datetime
 
-
 try:
     from typing import Literal
 except ImportError:
