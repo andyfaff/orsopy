@@ -110,7 +110,7 @@ class OrsoDataset:
         return out
 
     def save(self, fname):
-        return save([self], fname)
+        return save_orso([self], fname)
 
     def __eq__(self, other: 'OrsoDataset'):
         return self.info == other.info and (self.data == other.data).all()
@@ -120,7 +120,7 @@ class ORSOIOError(IOError):
     pass
 
 
-def save(datasets: List[OrsoDataset], fname: Union[TextIO, str]):
+def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]):
     with _possibly_open_file(fname, 'w') as f:
         header = f"{ORSO_designate}\n"
         ds1 = datasets[0]
@@ -138,7 +138,7 @@ def read_data(text_data):
     return np.array(data, dtype=float).T
 
 
-def load(fname: Union[TextIO, str]):
+def load_orso(fname: Union[TextIO, str]):
     with _possibly_open_file(fname, 'r') as fh:
         # check if this is the right file type
         l1 = fh.readline()
@@ -152,7 +152,7 @@ def load(fname: Union[TextIO, str]):
     header = header[2:].replace('\n# ', '\n')  # remove header comment to make the text valid yaml
     header_encoding = ftype_info[2].lower().split()[0]
     if header_encoding == 'yaml':
-        main_header_dict = yaml.load(header, Loader=yaml.FullLoader)
+        main_header_dict = yaml.load_orso(header, Loader=yaml.FullLoader)
         ds_string = '\n# data_set:'
     elif header_encoding == 'json':
         raise NotImplementedError('JSON will come in future')
@@ -171,7 +171,7 @@ def load(fname: Union[TextIO, str]):
             data = read_data(text[si + sub_header_length:split_indices[i + 1]])
             sub_header_text = text[si + 2:si + sub_header_length].rsplit('\n', 1)[0].replace('\n# ', '\n').strip()
             if header_encoding == 'yaml':
-                sub_header_data = yaml.load(sub_header_text, Loader=yaml.FullLoader)
+                sub_header_data = yaml.load_orso(sub_header_text, Loader=yaml.FullLoader)
             elif header_encoding == 'json':
                 raise NotImplementedError('JSON will come in future')
             # create a merged dictionary

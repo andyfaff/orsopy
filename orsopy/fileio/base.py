@@ -444,7 +444,7 @@ def _validate_header_data(dct_list: List[dict]):
     pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
     with open(schema_pth, "r") as f:
-        schema = json.load(f)
+        schema = json.load_orso(f)
 
     # d contains datetime.datetime objects, which would fail the
     # jsonschema validation, so force those to be strings.

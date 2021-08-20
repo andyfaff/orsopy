@@ -7,7 +7,7 @@ from .base import (Header, Column, Person, ValueRange, ValueVector, Value,
 from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
                           Measurement)
 from .reduction import Reduction, Software
-from .orso import Orso, OrsoDataset, save, load
+from .orso import Orso, OrsoDataset, save_orso, load_orso
 
 # author: Andrew R. McCluskey (arm61)
 
