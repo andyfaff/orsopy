@@ -6,9 +6,10 @@ Implementation of the base classes for the ORSO header.
 
 import os.path
 from collections.abc import Mapping
-from typing import Optional, Union, List, get_args, get_origin, Literal
+from typing import Optional, Union, List, get_args, get_origin, Literal, Tuple
 from inspect import isclass
 from dataclasses import field, dataclass, fields
+from copy import deepcopy
 import datetime
 import pathlib
 import warnings
@@ -159,20 +160,22 @@ class Header(metaclass=HeaderMeta):
             ):
                 continue
 
-            if hasattr(value, "_orso_optionals"):
+            if hasattr(value, "to_dict"):
                 out_dict[i] = value.to_dict()
-            elif isinstance(value, list):
+            elif isinstance(value, (list, tuple)):
                 cleaned_list = []
                 for j in value:
-                    if hasattr(j, "_orso_optionals"):
+                    if hasattr(j, "to_dict"):
                         cleaned_list.append(j.to_dict())
                     else:
                         cleaned_list.append(j)
-                out_dict[i] = cleaned_list
+                out_dict[i] = type(value)(cleaned_list)
             elif i == "data_set" and value == 0:
                 continue
             else:
-                out_dict[i] = value
+                # here _todict converts objects that aren't derived from Header
+                # and therefore don't have to_dict methods.
+                out_dict[i] = _todict(value)
         return out_dict
 
     def to_yaml(self):
@@ -334,7 +337,7 @@ class File(Header):
                 )
 
 
-def _read_header_data(file):
+def _read_header_data(file, validate=False) -> Tuple[dict, list]:
     """
     Reads the header and data contained within an ORSO file, parsing it into
     json dictionaries and numerical arrays.
@@ -342,6 +345,10 @@ def _read_header_data(file):
     Parameters
     ----------
     file: str or file-like
+
+    validate: bool
+        Validates the file against the ORSO json schema.
+        Requires that the jsonschema package be installed.
 
     Returns
     -------
@@ -356,40 +363,42 @@ def _read_header_data(file):
     with _possibly_open_file(file, "r") as fi:
         header = []
 
-        # variables to keep track of where the numerical datasets are
-        ds_lines = []
-        in_ds = False
-        start_line = -1
-        end_line = -1
+        # collection of the numerical arrays
+        data = []
+        _ds_lines = []
         first_dataset = True
 
         for i, line in enumerate(fi.readlines()):
             if not line.startswith("#"):
-                if not in_ds:
-                    # you're in the first line of a dataset
-                    in_ds = True
-                    start_line = i
+                _ds_lines.append(line)
                 continue
-
-            # at this point all lines begin with #
-            if in_ds:
-                # you've reached the first line after a comment line
-                end_line = i - 1
-                ds_lines.append((start_line, end_line))
-                start_line = end_line = -1
-                in_ds = False
 
             if line.startswith("# data_set") and first_dataset:
                 header.append(line[1:])
                 first_dataset = False
             elif line.startswith("# data_set") and not first_dataset:
+                # a new dataset is starting. Complete the previous dataset's
+                # numerical array  and start collecting the numbers for this
+                # dataset
+                _d = np.array(
+                    [np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines]
+                )
+                data.append(_d)
+                _ds_lines = []
+
                 # append '---' to signify the start of a new yaml document
                 # Subsequent datasets get parsed into a separate dictionary,
                 # which can be used to synthesise new datasets from the first.
-                header.append(" ---\n")
+                header.append("---\n")
                 header.append(line[1:])
             else:
                 header.append(line[1:])
+
+        # append the last numerical array
+        _d = np.array(
+            [np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines]
+        )
+        data.append(_d)
 
         yml = "".join(header)
 
@@ -409,21 +418,14 @@ def _read_header_data(file):
         # synthesise json dicts for each dataset from the first dataset, and
         # updates to the yaml.
         first_dct = next(dcts)
-        dct_list = [_nested_update(first_dct.copy(), dct) for dct in dcts]
+        dct_list = [_nested_update(deepcopy(first_dct), dct) for dct in dcts]
         dct_list.insert(0, first_dct)
 
-        # now load the numerical data
-        # finished reading the file, have to append the last dataset
-        ds_lines.append((start_line, i))
+    if validate:
+        # requires jsonschema be installed
+        _validate_header_data(dct_list)
 
-        data = []
-        for ds_line in ds_lines:
-            fi.seek(0, 0)
-            start, end = ds_line
-            arr = np.loadtxt(fi, skiprows=start, max_rows=end - start + 1)
-            data.append(arr)
-
-        return dct_list, data
+    return dct_list, data
 
 
 def _validate_header_data(dct_list: List[dict]):
@@ -482,6 +484,35 @@ def _possibly_open_file(f, mode="wb"):
     yield g
     if close_file:
         g.close()
+
+
+def _todict(obj, classkey=None):
+    """
+    Recursively converts an object to a dict representation
+    https://stackoverflow.com/questions/1036409
+    Licenced under CC BY-SA 4.0
+    """
+    if isinstance(obj, dict):
+        data = {}
+        for (k, v) in obj.items():
+            data[k] = _todict(v, classkey)
+        return data
+    elif hasattr(obj, "_ast"):
+        return _todict(obj._ast())
+    elif hasattr(obj, "__iter__") and not isinstance(obj, str):
+        return [_todict(v, classkey) for v in obj]
+    elif hasattr(obj, "__dict__"):
+        data = dict(
+            [(key, _todict(value, classkey)) for key, value
+             in obj.__dict__.items()
+             if not callable(value) and not key.startswith('_')]
+        )
+
+        if classkey is not None and hasattr(obj, "__class__"):
+            data[classkey] = obj.__class__.__name__
+        return data
+    else:
+        return obj
 
 
 def _nested_update(d, u):

@@ -4,6 +4,7 @@ import jsonschema
 import yaml
 from orsopy import fileio
 from orsopy.fileio.base import _read_header_data, _validate_header_data
+import numpy as np
 
 
 class TestSchema:
@@ -14,8 +15,10 @@ class TestSchema:
             schema = json.load(f)
 
         dct_list, data = _read_header_data(
-            os.path.join("tests", "test_example.ort")
+            os.path.join("tests", "test_example.ort"),
+            validate=True
         )
+        assert data[0].shape == (2, 4)
 
         # d contains datetime.datetime objects, which would fail the
         # jsonschema validation, so force those to be strings.
@@ -26,3 +29,13 @@ class TestSchema:
             jsonschema.validate(dct, schema)
 
         _validate_header_data(dct_list)
+
+        # try a 2 dataset file
+        dct_list, data = _read_header_data(
+            os.path.join("tests", "test_example2.ort"),
+            validate=True
+        )
+        assert len(dct_list) == 2
+        assert dct_list[1]["data_set"] == "spin_down"
+        assert data[1].shape == (4, 4)
+        np.testing.assert_allclose(data[1][2:], data[0])

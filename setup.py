@@ -12,21 +12,21 @@ with open('HISTORY.rst') as history_file:
 
 requirements = ['pyyaml', 'dataclasses_json']
 
-test_requirements = ['pytest>=3', ]
+test_requirements = ['pytest>=3', 'jsonschema']
 
 setup(
     author="Andrew R. McCluskey",
     author_email='andrew.mccluskey@ess.eu',
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description="orsopy is a python implementation of ORSO functionality, such as file format phasing",
     install_requires=requirements,
