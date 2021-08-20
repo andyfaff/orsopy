@@ -8,7 +8,7 @@ import re
 import yaml
 from typing import List, Union, TextIO
 from dataclasses import dataclass
-from .base import Header, Column, Creator, _possibly_open_file
+from .base import Header, Column, Creator, _possibly_open_file, _read_header_data
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -90,7 +90,7 @@ class OrsoDataset:
     data: np.ndarray
 
     def __post_init__(self):
-        if self.data.shape[0] != len(self.info.columns):
+        if self.data.shape[1] != len(self.info.columns):
             raise ValueError("Data has to have the same number of columns as header")
 
     def header(self):
@@ -125,59 +125,19 @@ def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]):
         header = f"{ORSO_designate}\n"
         ds1 = datasets[0]
         header += ds1.header()
-        np.savetxt(f, ds1.data.T, header=header, fmt='%-22.16e')
+        np.savetxt(f, ds1.data, header=header, fmt='%-22.16e')
 
         for dsi in datasets[1:]:
             hi = ds1.diff_header(dsi)
-            np.savetxt(f, dsi.data.T, header=hi, fmt='%-22.16e')
-
-
-def read_data(text_data):
-    # read the data from the text, faster then numpy loadtxt with StringIO
-    data = [li.split() for li in text_data.strip().splitlines() if not li.startswith('#')]
-    return np.array(data, dtype=float).T
+            np.savetxt(f, dsi.data, header=hi, fmt='%-22.16e')
 
 
 def load_orso(fname: Union[TextIO, str]):
-    with _possibly_open_file(fname, 'r') as fh:
-        # check if this is the right file type
-        l1 = fh.readline()
-        if not l1.lower().startswith('# # orso'):
-            raise ORSOIOError('Not an ORSO reflectivity text file, wrong header')
-        text = fh.read()
-    ftype_info = list(map(str.strip, l1.split('|')))
-    # find end of comment block (first line not starting with #
-    data_start = re.search(r'\n[^#]', text).start()
-    header = text[:data_start - 1]
-    header = header[2:].replace('\n# ', '\n')  # remove header comment to make the text valid yaml
-    header_encoding = ftype_info[2].lower().split()[0]
-    if header_encoding == 'yaml':
-        main_header_dict = yaml.load_orso(header, Loader=yaml.FullLoader)
-        ds_string = '\n# data_set:'
-    elif header_encoding == 'json':
-        raise NotImplementedError('JSON will come in future')
-    else:
-        raise ORSOIOError('Unknown header encoding "%s"' % header_encoding)
-    main_info = Orso(**main_header_dict)
+    dct_list, datas = _read_header_data(fname)
 
-    # implement possibility of more then one data block:
-    if ds_string in text:
-        split_indices = [match.start() + data_start for
-                         match in re.finditer(ds_string, text[data_start:])] + [-1]
-        output = [OrsoDataset(main_info,
-                              read_data(text[data_start:split_indices[0]]))]
-        for i, si in enumerate(split_indices[:-1]):
-            sub_header_length = re.search(r'\n[^#]', text[si:]).start()
-            data = read_data(text[si + sub_header_length:split_indices[i + 1]])
-            sub_header_text = text[si + 2:si + sub_header_length].rsplit('\n', 1)[0].replace('\n# ', '\n').strip()
-            if header_encoding == 'yaml':
-                sub_header_data = yaml.load_orso(sub_header_text, Loader=yaml.FullLoader)
-            elif header_encoding == 'json':
-                raise NotImplementedError('JSON will come in future')
-            # create a merged dictionary
-            sub_info = main_info.from_difference(sub_header_data)
-            output.append(OrsoDataset(sub_info, data))
-        return output
-    else:
-        data = read_data(text[data_start:])
-        return [OrsoDataset(main_info, data)]
+    ods = []
+    for dct, data in zip(dct_list, datas):
+        o = Orso(**dct)
+        od = OrsoDataset(o, data)
+        ods.append(od)
+    return ods
