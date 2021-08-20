@@ -8,7 +8,8 @@ import re
 import yaml
 from typing import List, Union, TextIO
 from dataclasses import dataclass
-from .base import Header, Column, Creator, _possibly_open_file, _read_header_data
+from .base import (Header, Column, Creator, _possibly_open_file,
+                   _read_header_data, _nested_update, _dict_diff)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -45,43 +46,15 @@ class Orso(Header):
     def from_difference(self, other_dict):
         # recreate info from difference dictionary
         output = self.to_dict()
-        self._update_dict(output, other_dict)
+        output = _nested_update(output, other_dict)
         return Orso(**output)
-
-    @staticmethod
-    def _update_dict(old, new):
-        for key, value in new.items():
-            if key in old and type(value) is dict:
-                Orso._update_dict(old[key], value)
-            else:
-                old[key] = value
 
     def to_difference(self, other: 'Orso'):
         # return a dictionary of differences to other object
         my_dict = self.to_dict()
         other_dict = other.to_dict()
-        out_dict = self._dict_diff(my_dict, other_dict)
+        out_dict = _dict_diff(my_dict, other_dict)
         return out_dict
-
-    @staticmethod
-    def _dict_diff(old, new):
-        # recursive find differences between two dictionaries
-        out = {}
-        for key, value in new.items():
-            if key in old:
-                if type(value) is dict:
-                    diff = Orso._dict_diff(old[key], value)
-                    if diff == {}:
-                        continue
-                    else:
-                        out[key] = diff
-                elif old[key] == value:
-                    continue
-                else:
-                    out[key] = value
-            else:
-                out[key] = value
-        return out
 
 
 @dataclass
@@ -100,12 +73,14 @@ class OrsoDataset:
 
     def diff_header(self, other: 'OrsoDataset'):
         # return a header string that only contains changes to other OrsoDataset
-        out_dict = self.info.to_difference(other.info)
-        if 'data_set' in out_dict:
-            del out_dict['data_set']
-        out = f'data_set: {other.info.data_set}\n'
-        if out_dict != {}:
-            out += yaml.dump(out_dict, sort_keys=False)
+        # ensure that data_set is the first entry
+        out_dict = {"data_set": None}
+
+        _diff = self.info.to_difference(other.info)
+        out_dict.update(_diff)
+        out_dict["data_set"] = other.info.data_set
+
+        out = yaml.dump(out_dict, sort_keys=False)
         out += self.info.column_header()
         return out
 
