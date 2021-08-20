@@ -12,7 +12,7 @@ class TestSchema:
         pth = os.path.dirname(fileio.__file__)
         schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
         with open(schema_pth, "r") as f:
-            schema = json.load_orso(f)
+            schema = json.load(f)
 
         dct_list, data = _read_header_data(
             os.path.join("tests", "test_example.ort"),

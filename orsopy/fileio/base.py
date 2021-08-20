@@ -107,7 +107,7 @@ class Header(metaclass=HeaderMeta):
         else:
             # the hint is a combined type (Union/List etc.)
             hbase = get_origin(hint)
-            if hbase in (list, tuple:
+            if hbase in (list, tuple):
                 t0 = get_args(hint)[0]
                 if isinstance(item, (list, tuple)):
                     return [Header._resolve_type(t0, i) for i in item]
@@ -444,7 +444,7 @@ def _validate_header_data(dct_list: List[dict]):
     pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
     with open(schema_pth, "r") as f:
-        schema = json.load_orso(f)
+        schema = json.load(f)
 
     # d contains datetime.datetime objects, which would fail the
     # jsonschema validation, so force those to be strings.
