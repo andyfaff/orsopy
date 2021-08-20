@@ -107,9 +107,9 @@ class Header(metaclass=HeaderMeta):
         else:
             # the hint is a combined type (Union/List etc.)
             hbase = get_origin(hint)
-            if hbase is list:
+            if hbase in (list, tuple:
                 t0 = get_args(hint)[0]
-                if type(item) is list:
+                if isinstance(item, (list, tuple)):
                     return [Header._resolve_type(t0, i) for i in item]
                 else:
                     return [Header._resolve_type(t0, item)]
