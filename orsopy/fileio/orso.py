@@ -91,10 +91,6 @@ class OrsoDataset:
         return self.info == other.info and (self.data == other.data).all()
 
 
-class ORSOIOError(IOError):
-    pass
-
-
 def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]):
     with _possibly_open_file(fname, 'w') as f:
         header = f"{ORSO_designate}\n"
